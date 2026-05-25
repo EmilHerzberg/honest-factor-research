@@ -243,6 +243,10 @@ def main(argv=None) -> int:
     parser.add_argument("--output-suffix", default="trust-stratified")
     parser.add_argument("--spotlight", default=None,
                         help="Print a focused spotlight for this ticker (e.g. JPM)")
+    parser.add_argument("--start-snapshot", default="2020-12-31",
+                        help="First monthly snapshot date (default 2020-12-31)")
+    parser.add_argument("--end-snapshot", default="2024-12-31",
+                        help="Last monthly snapshot date (default 2024-12-31)")
     args = parser.parse_args(argv)
 
     factor_snap = Path(args.snapshot) if args.snapshot else resolve_factor_snapshot()
@@ -268,7 +272,7 @@ def main(argv=None) -> int:
     logger.info("Symbols: %d", len(symbols))
 
     # Monthly snapshot grid
-    month_ends = pd.date_range(start="2020-12-31", end="2024-12-31", freq="ME")
+    month_ends = pd.date_range(start=args.start_snapshot, end=args.end_snapshot, freq="ME")
     factor_dates = pd.DatetimeIndex(factor_returns.index).normalize()
     snapshot_dates = []
     for me in month_ends:

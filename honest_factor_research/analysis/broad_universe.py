@@ -192,6 +192,8 @@ def main(argv=None) -> int:
                         help="Test mode: only process N assets")
     parser.add_argument("--start", default="2019-06-01")
     parser.add_argument("--end", default="2024-12-31")
+    parser.add_argument("--start-snapshot", default="2020-12-31",
+                        help="First monthly snapshot date (default 2020-12-31)")
     parser.add_argument("--output-suffix", default="broad-universe")
     args = parser.parse_args(argv)
 
@@ -218,7 +220,7 @@ def main(argv=None) -> int:
         eligible = eligible[: args.sample]
     logger.info("Eligible assets: %d", len(eligible))
 
-    month_ends = pd.date_range(start="2020-12-31", end=args.end, freq="ME")
+    month_ends = pd.date_range(start=args.start_snapshot, end=args.end, freq="ME")
     factor_dates = pd.DatetimeIndex(factor_returns.index).normalize()
     snapshot_dates = []
     for me in month_ends:
