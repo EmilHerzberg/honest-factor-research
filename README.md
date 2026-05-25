@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Honest Factor Research — a reproducible model-audit framework for stock factor models" width="100%">
+</p>
+
 # Honest Factor Research
 
 > **A reproducible model-audit framework for stock factor models.**
@@ -13,6 +17,22 @@
 > ⚠️ **Not investment advice.** This repository is for research and
 > educational purposes only. It does not provide trading recommendations,
 > portfolio advice, or financial forecasts. See [Limitations](#limitations).
+
+> **In one line:** this project is not about predicting the market —
+> it is about auditing whether a model's explanation can be trusted.
+
+---
+
+## Start here
+
+Different readers will care about different things:
+
+- **New to factor models?** Read the [Plain-English Guide](docs/00-plain-english-guide.md).
+- **Want to run it?** Jump to [Quickstart](#quickstart).
+- **Reviewing the methodology?** Read [METHODOLOGY.md](METHODOLOGY.md).
+- **Looking for evidence?** See the [Research Reports](reports/).
+- **Evaluating this as a portfolio project?** See [For recruiters and AI teams](#for-recruiters-and-ai-teams).
+- **Looking up a term?** See [Glossary](docs/glossary.md).
 
 ---
 
@@ -50,10 +70,30 @@ model is actually useful:
 | **For data scientists / ML engineers** | A testbed for model evaluation, leakage detection, robustness checks, and uncertainty quantification on noisy real-world data. |
 | **For AI startup / product teams** | A working example of how to operationalize model trust, uncertainty estimates, and critical evaluation in a domain where overconfidence is easy. |
 
-The methodology generalizes far beyond stocks. Any model that uses
-basket-ETF-like aggregate features risks mirror artifacts. Any model
-calibrated on quiet-market data is exposed to regime breaks. Any model
-that reports a single point estimate hides fat-tail uncertainty.
+---
+
+## Why this matters beyond finance
+
+Financial factor models are a useful **testbed** for a broader problem
+in applied ML evaluation. The same failure patterns appear far outside
+finance:
+
+| Problem here (finance) | Same problem elsewhere (ML) |
+|---|---|
+| Sector ETF contains the stock being explained | Training feature leaks the target |
+| Beta flips between high-VIX and low-VIX regimes | Model fails under distribution shift |
+| Proxy ETF doesn't measure what its name says | Benchmark dataset doesn't match deployment population |
+| Single R² hides fat-tail uncertainty | Single accuracy score hides per-slice failure modes |
+| Static averages mask regime structure | Pooled metrics hide subgroup performance gaps |
+
+The shared lesson: **a model that reports confident outputs while the
+evaluation setup hides what's actually being measured is more dangerous
+than a model that's openly uncertain.**
+
+This repo demonstrates how to make model evaluation more skeptical,
+more structured, and more transparent — using a domain (US equity
+factor models) where the failure modes are well-known and the data is
+freely available.
 
 ---
 
@@ -110,22 +150,24 @@ stocks. See [`reports/`](reports/) for the raw outputs.
 | **18.3% of asset-factor pairs** had regime-dependent beta with `\|t_diff\| ≥ 2.5` between high-VIX and low-VIX regimes | Static beta is wrong in at least one regime for 1 in 5 pairs | Models that don't account for regimes will fail exactly when markets get interesting |
 | **Lithium beat Gold** as a broadly explanatory factor (mean Δr²=+0.010 vs Gold's +0.005 across 2,241 stocks) | Theory said Gold was essential. Data disagreed. | Empirical validation can overturn intuitive priors — don't trust theory without checking |
 | **Brent-spot replaced XLE** for oil exposure → r² for energy stocks roughly doubled (e.g. XOM/COP +0.218 each) | The factor ETF (XLE) was measuring stock reactions to oil, not oil itself | Choosing the right proxy matters more than people realize |
-| **Block-bootstrap CIs** showed crisis-period windows have R²-CI widths up to 0.43 | Single-number R² hides huge uncertainty when the data is fat-tailed | If your CI spans 0.3 to 0.7, the point estimate is meaningless |
+| **Block-bootstrap CIs** can be 0.2+ wide for windows containing crisis days (e.g. AAPL 2021-02-26 window: R²=0.79, CI=[0.64, 0.89] — verified on bundled data) | Single-number R² hides huge uncertainty when the data is fat-tailed | If your CI is wide, the point estimate alone is misleading |
 | **`growth × value` correlation** was fixed from -0.925 to +0.000 after re-ordering residualization | The original tier setup was double-counting style information | Residualization order is a real engineering decision, not a detail |
 
 ---
 
 ## Visual example
 
-Output from [`examples/01_quickstart.py`](examples/01_quickstart.py)
-showing the trust-stratified decomposition for AAPL on a single snapshot:
+The headline methodology in one picture. **DUK (Duke Energy)** on
+2024-06-28 — the standard R² is 0.659 (looks like a high-quality fit),
+but trust-stratified decomposition reveals that **50% of the explained
+variance comes from sector baskets** (DUK is a constituent of XLU):
 
-![Trust-Stratified R² Decomposition Example](examples/01_quickstart_decomposition.png)
+![Traditional R² vs Honest Decomposition](assets/trust_decomposition.png)
 
-The standard "R²" for this fit is the green + blue + orange bars summed
-(`r²_total`). What's interesting is the split: how much of that R² is
-*honest* (direct) vs. how much is statistical-style vs. how much is
-sector-derived (possibly mirror).
+A simpler view for any single asset using
+[`examples/01_quickstart.py`](examples/01_quickstart.py):
+
+![Trust-Stratified R² Decomposition — AAPL example](examples/01_quickstart_decomposition.png)
 
 ---
 
@@ -188,6 +230,17 @@ pip install -e ".[dev]"
 # Run the headline trust-stratified analysis on the bundled sample data
 python examples/01_quickstart.py
 ```
+
+**Verified commands** (what works out-of-the-box vs. what needs extra data):
+
+| Command | Works with bundled data? | Notes |
+|---|---|---|
+| `pytest tests/test_residualization.py tests/test_bootstrap.py` | ✅ yes (no data needed) | Pure-math tests, ~2 sec |
+| `python examples/01_quickstart.py` | ✅ yes (bundled snapshot, 4.8 MB) | Tested, produces plot |
+| `python examples/02_full_pipeline.py` | ✅ yes (bundled snapshot) | Full V3.5 pipeline on 5 tickers |
+| `python examples/03_explain_single_stock.py --ticker DUK` | ✅ yes (bundled snapshot) | Single-ticker explainer CLI |
+| `python -m honest_factor_research.analysis.trust_stratified` | ✅ yes (bundled snapshot) | Re-runs Analysis 6 |
+| `python examples/reproduce_findings.py` | ⚠️ partial | Needs broad-universe OHLCV (50 MB) for Analysis 8 — fetch via `python -m honest_factor_research.data.fetch` |
 
 Output (verbatim from a fresh run):
 

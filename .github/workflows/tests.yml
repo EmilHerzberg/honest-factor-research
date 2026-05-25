@@ -1,6 +1,6 @@
 name: tests
 
-on:
+"on":
   push:
     branches: [main]
   pull_request:
@@ -9,10 +9,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -25,19 +27,18 @@ jobs:
       - name: Install package + dev dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev]" || pip install -e .
 
       - name: Show installed package
-        run: pip show honest-factor-research
-
-      - name: Run unit tests
         run: |
-          # Skip the pipeline-smoke test by default — it needs the bundled
-          # parquet snapshot and yfinance access. The pure-math tests
-          # (residualization + block-bootstrap) run unconditionally.
+          pip list
+          python -c "import honest_factor_research; print('Package import OK')"
+
+      - name: Run core unit tests
+        run: |
           pytest tests/test_residualization.py tests/test_bootstrap.py -v
 
-      - name: Run smoke test if sample data present
+      - name: Run smoke test if sample data is available
         run: |
           if [ -f "data/factor_etfs_2026-05-21.parquet" ]; then
             pytest tests/test_pipeline_smoke.py -v
@@ -47,16 +48,19 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+
       - name: Install ruff
         run: pip install ruff
+
       - name: Run ruff (non-blocking)
-        # Lint findings won't fail CI yet — the codebase is research-grade.
-        # Once we add proper formatting passes, switch to `ruff check` only.
         continue-on-error: true
         run: ruff check honest_factor_research/ examples/ tests/

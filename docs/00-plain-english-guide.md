@@ -137,18 +137,19 @@ If you want to:
 
 ## A final thought
 
-The financial-data community has been good at building factor models for
-50+ years. The community has been less good at consistently asking
+The financial-modeling community has spent decades building factor
+models. It has spent comparatively less effort on consistently asking:
 "how would we know if this model was wrong?"
 
-This project is one small contribution to that question. It doesn't
-solve the problem — there are entire research fields dedicated to robust
-statistics, regime-switching models, leakage detection, etc. But it
-takes the existing tooling, packages it for an applied research context,
-and shows that even small empirical audits can change conclusions you
-would otherwise have published with confidence.
+This project is a small, practical contribution to that question. It
+doesn't solve the underlying problem — there are entire fields
+(robust statistics, regime-switching models, leakage detection) that
+address pieces of it. What this project does is take that existing
+tooling, package it for an applied research context, and demonstrate
+that even modest empirical audits can change conclusions a user might
+otherwise publish with confidence.
 
-The same lesson applies to ML systems far outside finance. Any model
-that produces a single confidence score risks producing it
-overconfidently. Building the habit of asking "how much of this can we
-actually defend?" is the broader takeaway.
+The same lesson applies beyond finance: any model that produces a
+single confidence score risks producing it overconfidently. Building
+the habit of asking "how much of this can we actually defend?" is the
+broader takeaway.
