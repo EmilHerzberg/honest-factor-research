@@ -8,6 +8,30 @@ This document explains the methodological choices behind the code in this
 repo. The goal is not to maximize R² — it is to **maximize the amount of
 variance we can honestly defend**.
 
+> ⚠️ **Important.** This methodology measures *correlations* in historical
+> data. It does not claim that any factor *causes* any asset's return.
+> Empirical patterns documented here may not generalize to future periods,
+> different universes, or different preprocessing choices. This is
+> **research and evaluation tooling, not an investment system.**
+
+## Scope of claims
+
+What this methodology *does* support:
+
+- Detecting when an R² is inflated by sector-mirror effects
+- Quantifying R² uncertainty via non-parametric resampling
+- Identifying regime-dependent factor relationships
+- Comparing proxy ETFs to alternative measurements of the same concept
+
+What this methodology *does NOT* support:
+
+- Predicting future returns
+- Generating trading signals
+- Establishing causal relationships
+- Making claims that generalize to markets or periods not in the data
+- Substituting for proper out-of-sample backtesting in a production
+  investment process
+
 ## Why "honest" R² matters
 
 A factor model that reports R²=0.85 sounds impressive. But that single

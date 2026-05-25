@@ -1,58 +1,129 @@
-# Reports — Research Evidence
+# Research Reports
 
-This directory contains the actual markdown + CSV outputs from running
-the analysis pipeline. These are real research deliverables produced
-during the V3.3 → V3.5 evolution of the methodology — kept here as
-evidence of what the code actually produces and as reproducible artifacts.
+> These are real pipeline outputs from running the analysis modules over
+> a multi-week research arc. Kept here as **evidence** of what the code
+> actually produces, and as a reproducibility benchmark. Each report is a
+> markdown file with tables, statistics, and interpretation — generated
+> directly from the code in
+> [`honest_factor_research/analysis/`](../honest_factor_research/analysis/).
 
-## Layout
+---
 
+## Recommended reading order
+
+If you're new to the project and want the fastest path to understanding
+what the methodology produces:
+
+1. **[Trust-stratified R² — V3.4 verification re-run](2026-05-25-v3.5-regime-and-ci/06_trust_stratified_r2.md)**
+   — *The headline result.* Shows how decomposing R² into DIRECT /
+   STATISTICAL / DERIVED tiers changes which assets actually look
+   well-explained.
+
+2. **[Broad-universe replay (2,241 stocks)](2026-05-24-v3.4-validation/08_broad_universe_replay.md)**
+   — Scale-up of the analysis from 60 stocks to 2,241. Shows how mean
+   `r²_direct` collapses from a small-sample 0.386 to a broad-universe
+   0.250 — most of the broader market is genuinely idiosyncratic.
+
+3. **[Direct-factor replacement + tier expansion](2026-05-24-v3.4-validation/07_direct_factor_replacement.md)**
+   — How to test whether a candidate factor adds real explanation.
+   The Lithium-beats-Gold finding lives here.
+
+4. **[Conditional-beta / regime analysis](2026-05-25-v3.5-regime-and-ci/10_conditional_betas.md)**
+   — Shows that 18.3% of asset-factor pairs have regime-dependent betas.
+   Static-beta models are wrong in at least one regime for 1 in 5 pairs.
+
+5. **[Final synthesis V3.4-V3.5](2026-05-24-v3.4-validation/08_broad_universe_replay.md)**
+   — Aggregated findings + the empirical case for sector-conditional
+   factor architectures.
+
+---
+
+## All reports by date
+
+### `2026-05-23-orthogonality-and-discovery/`
+
+Initial analyses on the 60-asset MVP universe. Established the baseline
+methodology and identified the original `growth × value` ρ=-0.925
+orthogonality bug.
+
+| Report | Plain-English summary |
+|---|---|
+| [`01_factor_orthogonality.md`](2026-05-23-orthogonality-and-discovery/01_factor_orthogonality.md) | After Gram-Schmidt residualization, are factors actually orthogonal? Max off-diagonal ρ was 0.925 (catastrophic) — fixed by re-ordering residualization tier. |
+| [`02_beta_signs.md`](2026-05-23-orthogonality-and-discovery/02_beta_signs.md) | Sanity check: do actual factor betas match naive sector priors? |
+| [`03_residual_analysis.md`](2026-05-23-orthogonality-and-discovery/03_residual_analysis.md) | Per-asset residual statistics (kurtosis, outliers, std). |
+| [`04_index_discovery.md`](2026-05-23-orthogonality-and-discovery/04_index_discovery.md) | Univariate R² of 60 assets × 46 candidate index ETFs — which sectors need their own factor? |
+| [`06_trust_stratified_r2.md`](2026-05-23-orthogonality-and-discovery/06_trust_stratified_r2.md) | **First headline result.** 32 of 60 assets get tier-downgrade under trust-stratified evaluation. |
+
+### `2026-05-24-v3.4-validation/`
+
+Mid-arc broad-universe validation + factor-catalog expansion. Replaced
+XLE with Brent for oil exposure; added 6 sector-conditional factors.
+
+| Report | Plain-English summary |
+|---|---|
+| [`05_index_purity.md`](2026-05-24-v3.4-validation/05_index_purity.md) | Tests whether each factor proxy actually measures what its name suggests. 3 proxies were `fundamentally_different` from their alternatives (TIP-IEF inflation, XLV healthcare, FXI China). |
+| [`07_direct_factor_replacement.md`](2026-05-24-v3.4-validation/07_direct_factor_replacement.md) | Tests V1→V2→V3 replacement chain + 12 Tier-1-3 individual candidates. The Lithium-beats-Gold finding is in here. |
+| [`08_broad_universe_replay.md`](2026-05-24-v3.4-validation/08_broad_universe_replay.md) | Scale-up to 2,241 US stocks. Headline: `r²_direct` collapses from 0.386 (60-sample) to 0.250 (broad). |
+| [`08_per_sector_factor_relevance.csv`](2026-05-24-v3.4-validation/08_per_sector_factor_relevance.csv) | Per-sector Δr² table — which factors matter for which GICS sectors. |
+
+### `2026-05-25-v3.5-regime-and-ci/`
+
+Final-arc additions: regime-switching betas + block-bootstrap CIs for
+R². The framework's V3.5 capabilities applied back to the original
+60-asset universe.
+
+| Report | Plain-English summary |
+|---|---|
+| [`06_trust_stratified_r2.md`](2026-05-25-v3.5-regime-and-ci/06_trust_stratified_r2.md) | Re-run after V3.4 catalog upgrade. `r²_direct` improved from 0.351 → 0.432 (+23%). |
+| [`09_lead_lag.md`](2026-05-25-v3.5-regime-and-ci/09_lead_lag.md) | Tests Asset[t+1] ~ Factor[t]. Detects ETF-timing artifacts and price-discovery leadership patterns. |
+| [`10_conditional_betas.md`](2026-05-25-v3.5-regime-and-ci/10_conditional_betas.md) | **18.3% of pairs have regime-dependent beta**, including extreme cases like GE × value flipping +2.94 → -0.15 between high-VIX and low-VIX days. |
+
+---
+
+## How to reproduce
+
+All reports here can be regenerated by running the corresponding
+analysis module. Numbers may differ slightly because today's yfinance
+data + today's NASDAQ-screener constituent list will be different from
+the snapshots used in these reports.
+
+```bash
+# Single analysis re-run (~30 seconds — 5 minutes depending on module)
+python -m honest_factor_research.analysis.trust_stratified
+python -m honest_factor_research.analysis.conditional_betas
+# ...etc
+
+# Full re-run of all 10 analyses (~1 hour with multiprocessing)
+python examples/reproduce_findings.py
 ```
-reports/
-├── 2026-05-23-orthogonality-and-discovery/   # Initial 60-asset MVP analyses
-│   ├── 01_factor_orthogonality.md           # Validates Gram-Schmidt
-│   ├── 02_beta_signs.md                     # Sector-prior sanity check
-│   ├── 03_residual_analysis.md              # Per-asset residual stats
-│   ├── 04_index_discovery.md                # Univariate factor search
-│   └── 06_trust_stratified_r2.md            # THE headline (V3.3)
-│
-├── 2026-05-24-v3.4-validation/               # V3.4 + Broad-Universe scale-up
-│   ├── 05_index_purity.md                   # Alternative-proxy correlations
-│   ├── 07_direct_factor_replacement.md      # V1→V2→V3 + Tier-1-3 candidates
-│   ├── 08_broad_universe_replay.md          # 2,241 stocks; r²_direct collapse
-│   ├── 08_per_sector_factor_relevance.csv   # Per-sector factor essentialness
-│   ├── replacement_proxies.parquet          # Cached yfinance fetch (~3 MB)
-│   └── 05_alt_proxies.parquet               # Cached alt proxies
-│
-└── 2026-05-25-v3.5-regime-and-ci/            # V3.5 regime + bootstrap features
-    ├── 06_trust_stratified_r2.md            # Re-run after V3.4 — shows +23% r²_direct
-    ├── 09_lead_lag.md                       # Asset[t+1] vs Factor[t] tests
-    └── 10_conditional_betas.md              # 18.3% of pairs are regime-dependent
-```
 
-## How to use these reports
+Re-runs land under `reports/<today>-<suffix>/` per the convention in
+[`honest_factor_research/analysis/_common.py`](../honest_factor_research/analysis/_common.py).
 
-**As reference:** when implementing your own analysis, look at the
-markdown reports to see what shape of output to expect.
+---
 
-**As evidence:** the headline findings in [`../README.md`](../README.md)
-all link back to specific sections in these reports.
+## What's NOT in this repo
 
-**As reproducibility check:** re-run the corresponding analysis
-(e.g. `python -m honest_factor_research.analysis.trust_stratified`) and
-diff the output. Today's data + today's yfinance state will give slightly
-different numbers but the patterns should hold.
+- **The full broad-universe OHLCV parquet (~50 MB)** is gitignored. Run
+  `python -m honest_factor_research.data.fetch` to recreate it.
+- **Reports from Analysis 8 that require the broad-universe OHLCV** can
+  be re-run after fetching, but the committed versions here are from
+  the original run.
 
-## Caveats
+---
 
-- Numbers in the reports are from runs against the bundled
-  `data/factor_etfs_2026-05-21.parquet` snapshot. Re-running with fresh
-  data will give slightly different numbers as the rolling-window
-  contents shift.
-- The 2024-12-31 endpoint is the latest snapshot covered. Analysis past
-  that date requires extending the snapshot via
-  `python -m honest_factor_research.data.fetch`.
-- Reports that ran against the broad-universe (Analysis 8) require the
-  `broad_universe_ohlcv_*.parquet` file, which is gitignored due to size.
-  Run `python -m honest_factor_research.data.fetch` to recreate (~10 min,
-  ~50 MB).
+## A note on the report dates
+
+The "V3.3 → V3.4 → V3.5" version markers reflect the internal
+development cadence — each represents one round of catalog/architecture
+expansion driven by the empirical findings:
+
+- **V3.3** (2026-05-23): initial 60-asset universe with 18 factors,
+  growth-value orthogonality fix
+- **V3.4** (2026-05-24): broad-universe scale-up, +2 universal factors,
+  +6 sector-conditional factors, proxy swaps
+- **V3.5** (2026-05-25): regime-switching betas, block-bootstrap CIs
+
+The pipeline code is at V3.5; the catalog in
+[`config/factors.yaml`](../honest_factor_research/config/factors.yaml)
+reflects the post-V3.5 state.
