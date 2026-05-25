@@ -1,0 +1,299 @@
+# Sample factor catalog used in the honest-factor-research showcase.
+#
+# 28 factors total — 5 universal-DIRECT, 4 STATISTICAL, 8 universal-DERIVED,
+# 5 sector-conditional DIRECT (Gold/Copper/NatGas + UK extras),
+# 6 sector-conditional DERIVED.
+#
+# Fields per factor:
+#   id                : stable slug, lowercase snake_case
+#   name              : human-readable
+#   category          : macro / style / sector / theme / geo
+#   description       : short prose explanation
+#   proxy_etf_symbol  : ETF/index ticker the factor is derived from
+#                       (or "<LONG>_minus_<SHORT>" for spread proxies)
+#   proxy_method      : returns_regression | spread | level_change
+#   tier              : 1-5 — residualization order (lower tier residualized first)
+#   class             : DIRECT | STATISTICAL | DERIVED — trust-stratification tier
+#   applicable_sectors: list of GICS sectors (optional; null/missing = universal)
+#
+# See METHODOLOGY.md for the trust-stratification rationale and
+# docs/02-factor-taxonomy.md for per-factor index-purity notes.
+
+factors:
+  # ─── Tier 1 — Market anchor ──────────────────────────────────────
+  - id: market_beta
+    name: "Market Beta"
+    category: macro
+    description: "Broad US equity market exposure (S&P 500)."
+    proxy_etf_symbol: SPY
+    proxy_method: returns_regression
+    tier: 1
+    class: STATISTICAL
+
+  # ─── Tier 2 — DIRECT-PHYSICAL macro (residualized vs market) ─────
+  - id: rates
+    name: "Interest Rates (10Y)"
+    category: macro
+    description: "iShares 7-10Y Treasury Bond — duration exposure to mid-tenor."
+    proxy_etf_symbol: IEF
+    proxy_method: returns_regression
+    tier: 2
+    class: DIRECT
+
+  - id: rates_30y
+    name: "30Y Treasury / Term-Premium"
+    category: macro
+    description: "iShares 20+Y Treasury Bond — long-end / term-premium exposure."
+    proxy_etf_symbol: TLT
+    proxy_method: returns_regression
+    tier: 2
+    class: DIRECT
+
+  - id: inflation
+    name: "Inflation Breakeven"
+    category: macro
+    description: "TIP minus IEF return spread — medium-TIPS breakeven proxy."
+    proxy_etf_symbol: TIP_minus_IEF
+    proxy_method: spread
+    tier: 2
+    class: DIRECT
+
+  - id: usd_strength
+    name: "USD Strength"
+    category: macro
+    description: "Invesco DB US Dollar (UUP) — DXY-basket exposure (58% EUR-weighted)."
+    proxy_etf_symbol: UUP
+    proxy_method: returns_regression
+    tier: 2
+    class: DIRECT
+
+  - id: volatility
+    name: "Volatility (VIX-Spot)"
+    category: macro
+    description: "^VIX spot index log-changes — fear/vol-regime proxy without futures contango."
+    proxy_etf_symbol: ^VIX
+    proxy_method: level_change
+    tier: 2
+    class: DIRECT
+
+  - id: credit_hy_spread
+    name: "HY-Credit Spread"
+    category: macro
+    description: "HYG minus IEF return spread — recession-leading credit-stress indicator."
+    proxy_etf_symbol: HYG_minus_IEF
+    proxy_method: spread
+    tier: 2
+    class: DIRECT
+
+  - id: energy_oil
+    name: "Crude Oil (Brent)"
+    category: macro
+    description: "Brent crude futures (BZ=F) — direct oil-price exposure."
+    proxy_etf_symbol: BZ=F
+    proxy_method: returns_regression
+    tier: 2
+    class: DIRECT
+
+  # ─── Tier 3 — STATISTICAL style (residualized vs market + rates) ─
+  - id: value
+    name: "Value Style"
+    category: style
+    description: "iShares Russell 1000 Value (IWD) — low-P/B + low-sales-growth."
+    proxy_etf_symbol: IWD
+    proxy_method: returns_regression
+    tier: 3
+    class: STATISTICAL
+
+  - id: momentum
+    name: "Momentum Style"
+    category: style
+    description: "iShares MSCI USA Momentum (MTUM) — 6/12-month risk-adjusted price momentum."
+    proxy_etf_symbol: MTUM
+    proxy_method: returns_regression
+    tier: 3
+    class: STATISTICAL
+
+  - id: quality
+    name: "Quality Style"
+    category: style
+    description: "iShares MSCI USA Quality (QUAL) — high ROE + low leverage + stable EPS."
+    proxy_etf_symbol: QUAL
+    proxy_method: returns_regression
+    tier: 3
+    class: STATISTICAL
+
+  # ─── Tier 4 — STATISTICAL growth (residualized vs market+rates+value) ─
+  # NOTE: originally tier 3 alongside value, but that produced
+  # growth↔value ρ=-0.925 (catastrophic anti-correlation). See docs/risks
+  # Risk #3 for the empirical fix-and-verify.
+  - id: growth
+    name: "Growth Style"
+    category: style
+    description: "iShares Russell 1000 Growth (IWF) — residualized against value to ensure orthogonality."
+    proxy_etf_symbol: IWF
+    proxy_method: returns_regression
+    tier: 4
+    class: STATISTICAL
+
+  # ─── Tier 4 — DERIVED_THEME sector baskets ───────────────────────
+  - id: semiconductors
+    name: "Semiconductors Sector"
+    category: sector
+    description: "iShares PHLX Semiconductor (SOXX)."
+    proxy_etf_symbol: SOXX
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  - id: xl_financials
+    name: "Financials Sector"
+    category: sector
+    description: "Financials Select Sector (XLF) — banks/insurance/asset-mgmt (BRK.B is 13% though)."
+    proxy_etf_symbol: XLF
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  - id: xl_healthcare
+    name: "Healthcare Sector"
+    category: sector
+    description: "Healthcare Select Sector (XLV) — pharma/biotech/devices (UNH is 10% though)."
+    proxy_etf_symbol: XLV
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  - id: xl_industrials
+    name: "Industrials Sector"
+    category: sector
+    description: "Industrials Select Sector (XLI) — aerospace/machinery/transport."
+    proxy_etf_symbol: XLI
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  - id: xl_consumer_defensive
+    name: "Consumer Defensive Sector"
+    category: sector
+    description: "Consumer Staples Select Sector (XLP) — food/beverages/household."
+    proxy_etf_symbol: XLP
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  - id: xl_utilities
+    name: "Utilities Sector"
+    category: sector
+    description: "Utilities Select Sector (XLU) — bond-proxy."
+    proxy_etf_symbol: XLU
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  - id: xl_real_estate
+    name: "Real Estate Sector"
+    category: sector
+    description: "Real Estate Select Sector (XLRE) — REITs."
+    proxy_etf_symbol: XLRE
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  # ─── Tier 4 — universal-DERIVED theme factors ────────────────────
+  - id: lithium
+    name: "Lithium / Battery Theme"
+    category: theme
+    description: "Global X Lithium & Battery Tech (LIT)."
+    proxy_etf_symbol: LIT
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  - id: uranium
+    name: "Uranium / Nuclear Theme"
+    category: theme
+    description: "Global X Uranium (URA)."
+    proxy_etf_symbol: URA
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+
+  # ─── Tier 5 — geo (residualized vs market+rates+growth) ──────────
+  - id: china_exposure
+    name: "China Exposure (HK-listed)"
+    category: geo
+    description: "FTSE China 50 (FXI) — HK-listed Tech 30% + Banks 20% (not mainland economy)."
+    proxy_etf_symbol: FXI
+    proxy_method: returns_regression
+    tier: 5
+    class: DERIVED
+
+  # ─── Sector-conditional factors (Mitigation 2G) ──────────────────
+  # Only loaded for assets whose GICS sector matches applicable_sectors.
+  - id: gold
+    name: "Gold Spot"
+    category: theme
+    description: "SPDR Gold Shares (GLD) — safe-haven."
+    proxy_etf_symbol: GLD
+    proxy_method: returns_regression
+    tier: 2
+    class: DIRECT
+    applicable_sectors:
+      - "Basic Materials"
+
+  - id: copper
+    name: "Copper Spot"
+    category: theme
+    description: "United States Copper Index Fund (CPER) — Dr. Copper."
+    proxy_etf_symbol: CPER
+    proxy_method: returns_regression
+    tier: 2
+    class: DIRECT
+    applicable_sectors:
+      - "Basic Materials"
+
+  - id: natural_gas
+    name: "Natural Gas Spot"
+    category: theme
+    description: "United States Natural Gas Fund (UNG)."
+    proxy_etf_symbol: UNG
+    proxy_method: returns_regression
+    tier: 2
+    class: DIRECT
+    applicable_sectors:
+      - "Energy"
+
+  - id: biotech
+    name: "Biotech Subsector"
+    category: sector
+    description: "iShares Biotechnology (IBB) — pure biotech, complement to XLV."
+    proxy_etf_symbol: IBB
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+    applicable_sectors:
+      - "Health Care"
+
+  - id: defense
+    name: "Aerospace & Defense Subsector"
+    category: sector
+    description: "iShares Aerospace & Defense (ITA) — pure defense, complement to XLI."
+    proxy_etf_symbol: ITA
+    proxy_method: returns_regression
+    tier: 4
+    class: DERIVED
+    applicable_sectors:
+      - "Industrials"
+
+  - id: china_a_shares
+    name: "China A-Shares"
+    category: geo
+    description: "Xtrackers CSI 300 A-Shares (ASHR) — mainland China, complement to FXI."
+    proxy_etf_symbol: ASHR
+    proxy_method: returns_regression
+    tier: 5
+    class: DERIVED
+    applicable_sectors:
+      - "Basic Materials"
+      - "Industrials"
+      - "Energy"

@@ -1,0 +1,33 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+*.log
+.idea/
+.vscode/
+*.swp
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Generated research outputs go under reports/ (committed) or
+# data/cache/ (gitignored) — never overwrite committed reports.
+data/cache/
+data/broad_universe_ohlcv_*.parquet
+data/raw/
+
+# OS
+.DS_Store
+Thumbs.db
