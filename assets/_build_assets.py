@@ -183,11 +183,11 @@ def build_trust_decomposition() -> None:
     )
     fig.patch.set_facecolor(BG)
 
-    # Title for whole figure
-    fig.text(0.5, 0.94, "When R² hides where the explanation comes from",
+    # Title for whole figure (lowered slightly to give the top breathing room)
+    fig.text(0.5, 0.90, "When R² hides where the explanation comes from",
              ha="center", color=TEXT, fontsize=20, fontweight="bold",
              fontfamily="DejaVu Sans")
-    fig.text(0.5, 0.89,
+    fig.text(0.5, 0.84,
              "DUK (Duke Energy) — window ending 2024-06-28",
              ha="center", color=TEXT_MUTED, fontsize=11, fontstyle="italic",
              fontfamily="DejaVu Sans")
