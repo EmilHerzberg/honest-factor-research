@@ -14,12 +14,13 @@
 [![Reproducible](https://img.shields.io/badge/data-reproducible-brightgreen.svg)](#reproducibility)
 [![Tests](https://github.com/EmilHerzberg/honest-factor-research/actions/workflows/tests.yml/badge.svg)](https://github.com/EmilHerzberg/honest-factor-research/actions)
 
-> ⚠️ **Not investment advice.** This repository is for research and
-> educational purposes only. It does not provide trading recommendations,
-> portfolio advice, or financial forecasts. See [Limitations](#limitations).
+> **This project audits stock factor models.**
+> **It does not try to predict the market.**
+> **It asks whether a model's explanation can actually be trusted.**
 
-> **In one line:** this project is not about predicting the market —
-> it is about auditing whether a model's explanation can be trusted.
+> ⚠️ Not investment advice. Research and educational purposes only —
+> no trading recommendations, portfolio advice, or financial forecasts.
+> See [Limitations](#limitations).
 
 ---
 
