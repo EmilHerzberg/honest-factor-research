@@ -382,7 +382,7 @@ honest-factor-research/
 │   ├── 2026-05-23-orthogonality-and-discovery/
 │   ├── 2026-05-24-v3.4-validation/
 │   ├── 2026-05-25-v3.5-regime-and-ci/
-│   └── 2026-05-26-broad-universe-20y/   # 2005-2025 broad-universe headline run
+│   └── 2026-05-26-long-history-2005-2025/   # 2005-2025 broad-universe headline run
 │
 ├── data/                              # bundled sample snapshots
 │   ├── factor_etfs_2025-12-31.parquet            # 28 ETFs + 61 demo stocks, 2005-2025

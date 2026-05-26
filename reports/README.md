@@ -14,12 +14,12 @@
 If you're new to the project and want the fastest path to understanding
 what the methodology produces:
 
-1. **[Trust-stratified R² — broad universe, 2005–2025](2026-05-26-broad-universe-20y/06_trust_stratified_r2.md)**
+1. **[Trust-stratified R² — broad universe, 2005–2025](2026-05-26-long-history-2005-2025/06_trust_stratified_r2.md)**
    — *The headline result.* Across ~2,758 stocks, mean `r²_direct` is just
    **0.25** (total R² 0.35) — versus **0.43 / 0.60** on a curated 60-stock
    large-cap sample. The clean benchmark was selection-biased optimism.
 
-2. **[Broad-universe replay (2,385 stocks)](2026-05-26-broad-universe-20y/08_broad_universe.md)**
+2. **[Broad-universe replay (2,385 stocks)](2026-05-26-long-history-2005-2025/08_broad_universe.md)**
    — Per-sector factor relevance across the full universe; mean `r²_direct`
    collapses from a small-sample 0.386 to a broad-universe 0.250 — most of
    the broad market is genuinely idiosyncratic.
@@ -28,11 +28,11 @@ what the methodology produces:
    — How to test whether a candidate factor adds real explanation.
    The Lithium-beats-Gold finding lives here.
 
-4. **[Conditional-beta / regime analysis](2026-05-26-broad-universe-20y/10_conditional_betas.md)**
+4. **[Conditional-beta / regime analysis](2026-05-26-long-history-2005-2025/10_conditional_betas.md)**
    — **14.9%** of asset-factor pairs have regime-dependent betas on the
    broad universe (down from 18.3% on the curated sample).
 
-5. **[Lead-lag analysis](2026-05-26-broad-universe-20y/09_lead_lag.md)**
+5. **[Lead-lag analysis](2026-05-26-long-history-2005-2025/09_lead_lag.md)**
    — Surfaces microstructure leaders (illiquid regional banks) and
    price-discovery patterns (energy names leading the inflation factor).
 
@@ -78,7 +78,7 @@ R². The framework's V3.5 capabilities applied back to the original
 | [`09_lead_lag.md`](2026-05-25-v3.5-regime-and-ci/09_lead_lag.md) | Tests Asset[t+1] ~ Factor[t]. Detects ETF-timing artifacts and price-discovery leadership patterns. |
 | [`10_conditional_betas.md`](2026-05-25-v3.5-regime-and-ci/10_conditional_betas.md) | **18.3% of pairs have regime-dependent beta**, including extreme cases like GE × value flipping +2.94 → -0.15 between high-VIX and low-VIX days. |
 
-### `2026-05-26-broad-universe-20y/`  ← headline dataset
+### `2026-05-26-long-history-2005-2025/`  ← headline dataset
 
 The full broad universe (~2,944 US stocks, 2,758 with sufficient history)
 over **2005–2025** — the current headline run, produced by the
@@ -87,10 +87,10 @@ curated-sample / mid-arc runs kept as a development trail.
 
 | Report | Plain-English summary |
 |---|---|
-| [`06_trust_stratified_r2.md`](2026-05-26-broad-universe-20y/06_trust_stratified_r2.md) | **Headline.** Mean r²_direct **0.253** / r²_total 0.352 across 2,758 stocks; 1,189 (43%) fall MED→LOW. The curated-sample 0.432 was selection bias. |
-| [`08_broad_universe.md`](2026-05-26-broad-universe-20y/08_broad_universe.md) | Per-sector factor relevance across 2,385 stocks; Lithium (+0.010) beats Gold (+0.004). |
-| [`09_lead_lag.md`](2026-05-26-broad-universe-20y/09_lead_lag.md) | 77k pairs. Illiquid regional banks show negative next-day market beta (microstructure); energy names lead the inflation factor. |
-| [`10_conditional_betas.md`](2026-05-26-broad-universe-20y/10_conditional_betas.md) | **14.9%** of pairs regime-dependent (vs 18.3% curated). A BDC / mortgage-REIT cluster flips sign on rate regimes (Δβ up to +3.8). |
+| [`06_trust_stratified_r2.md`](2026-05-26-long-history-2005-2025/06_trust_stratified_r2.md) | **Headline.** Mean r²_direct **0.253** / r²_total 0.352 across 2,758 stocks; 1,189 (43%) fall MED→LOW. The curated-sample 0.432 was selection bias. |
+| [`08_broad_universe.md`](2026-05-26-long-history-2005-2025/08_broad_universe.md) | Per-sector factor relevance across 2,385 stocks; Lithium (+0.010) beats Gold (+0.004). |
+| [`09_lead_lag.md`](2026-05-26-long-history-2005-2025/09_lead_lag.md) | 77k pairs. Illiquid regional banks show negative next-day market beta (microstructure); energy names lead the inflation factor. |
+| [`10_conditional_betas.md`](2026-05-26-long-history-2005-2025/10_conditional_betas.md) | **14.9%** of pairs regime-dependent (vs 18.3% curated). A BDC / mortgage-REIT cluster flips sign on rate regimes (Δβ up to +3.8). |
 
 ---
 
