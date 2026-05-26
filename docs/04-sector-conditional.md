@@ -7,8 +7,8 @@
 
 ## The motivation — broad-universe per-sector findings
 
-Analysis 8 (`broad_universe.py`) on 2,241 US stocks measured the marginal
-Δr² of each candidate factor — both globally and per GICS sector.
+Analysis 8 (`broad_universe.py`) on 2,385 US stocks (2005–2025) measured the
+marginal Δr² of each candidate factor — both globally and per GICS sector.
 
 **Pattern that emerged:** several factors are valuable, but their value is
 concentrated in specific sectors:

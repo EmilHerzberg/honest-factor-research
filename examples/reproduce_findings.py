@@ -1,7 +1,8 @@
 """Run ALL 10 analysis scripts end-to-end (reproduces the headline findings).
 
-Wall-clock: ~1 hour on 8 cores. Most time is in Analysis 8 (broad-universe
-replay across 2,241 assets with multiprocessing).
+Wall-clock: ~2-3 h on 6 cores. Most time is in Analysis 8 (broad-universe
+replay across ~2,944 assets, 2,385 with sufficient history; batched so peak
+memory stays bounded).
 
 Prerequisites:
     pip install -e ".[notebooks]"
