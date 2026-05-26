@@ -118,7 +118,7 @@ Re-runs land under `reports/<today>-<suffix>/` per the convention in
 
 ## What's NOT in this repo
 
-- **The full broad-universe OHLCV parquet (~50 MB)** is gitignored. Run
+- **The full broad-universe OHLCV parquet (~170 MB)** is gitignored. Run
   `python -m honest_factor_research.data.fetch` to recreate it.
 - **Reports from Analysis 8 that require the broad-universe OHLCV** can
   be re-run after fetching, but the committed versions here are from

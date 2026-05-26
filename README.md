@@ -142,12 +142,32 @@ Brief plain-language explanations. Full definitions in [`docs/glossary.md`](docs
 
 ---
 
+## Data scope
+
+Four universe sizes appear throughout this repo. They are **nested subsets of
+the same 2005–2025 run**, not separate datasets — the differences are purely
+how much price history each analysis requires:
+
+| Count | What it is | Used by |
+|---|---|---|
+| **~2,944** | The **broad universe** — top-market-cap US stocks pulled for 2005–2025 (the raw constituent list, before any history filter). | What the pipeline streams over. |
+| **2,758** | Stocks with **≥252 trading days (~1 year)** of returns — enough for a single trust-stratified R² window. | Analysis 6 (trust-stratified R²) — the headline `r²_direct ≈ 0.25` collapse. |
+| **2,385** | Stocks with **~3.5 years** of history — enough for the multi-snapshot per-sector replay. | Analysis 8 (broad-universe per-sector factor relevance). |
+| **60** | A **curated large-cap sample** — the deliberately flattering benchmark. | Shown alongside the broad universe to expose selection bias (`r²_direct ≈ 0.43` vs 0.25). |
+
+So "2,758 with sufficient history" and "2,385 stocks" are the *same run* measured
+at two different minimum-history thresholds; the curated **60** is the optimistic
+comparison the broad universe corrects.
+
+---
+
 ## Key findings
 
-All numbers below come from actually running the pipeline across a broad
-universe of ~2,900 top-market-cap US stocks (2,758 with sufficient history)
-over **2005–2025**, with a curated 60-stock large-cap sample shown alongside
-to expose selection bias. See [`reports/`](reports/) for the raw outputs.
+All numbers below come from actually running the pipeline across the broad
+universe of **~2,944** top-market-cap US stocks over **2005–2025** (see
+[Data scope](#data-scope) above for the 2,758 / 2,385 subsets), with the
+curated 60-stock large-cap sample shown alongside to expose selection bias.
+See [`reports/`](reports/) for the raw outputs.
 
 | Finding | Plain-English meaning | Why it matters |
 |---|---|---|
@@ -167,6 +187,11 @@ The headline methodology in one picture. **DUK (Duke Energy)** on
 2024-06-28 — the standard R² is 0.658 (looks like a high-quality fit),
 but trust-stratified decomposition reveals that **about half of the
 explained variance comes from sector baskets** (DUK is a constituent of XLU):
+
+> **Note:** 2024-06-28 is a *single* 252-day-window snapshot — one point in time
+> inside the 2005–2025 long-history run, chosen to illustrate the method on one
+> asset. It is **not** a separate short backtest; the headline universe-wide
+> numbers above span the full 20 years.
 
 ![Traditional R² vs Honest Decomposition](assets/trust_decomposition.png)
 
