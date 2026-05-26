@@ -17,7 +17,7 @@ DEFAULT_DATA_DIR = PACKAGE_ROOT / "data"
 DEFAULT_REPORTS_DIR = PACKAGE_ROOT / "reports"
 
 
-def resolve_factor_snapshot(date_suffix: str = "2026-05-21") -> Path:
+def resolve_factor_snapshot(date_suffix: str = "2025-12-31") -> Path:
     """Locate the default factor-ETFs snapshot parquet."""
     candidate = DEFAULT_DATA_DIR / f"factor_etfs_{date_suffix}.parquet"
     if candidate.exists():

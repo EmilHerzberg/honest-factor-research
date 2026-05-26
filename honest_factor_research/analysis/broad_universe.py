@@ -1,9 +1,11 @@
 """Analysis 8 — Broad-Universe Replay (multiprocessing).
 
 Scale-up of the replacement-test (Analysis 7) from a 60-asset MVP universe
-to the full broad-universe (Russell-3000 approximation, ~2,241 US stocks
-with sufficient history). Uses ``ProcessPoolExecutor`` with 8 workers —
-~18 minutes total wall-clock on a typical laptop.
+to the full broad-universe (Russell-3000 approximation, ~2,944 US stocks,
+2,385 with sufficient history) over 2005-2025. Streams the universe in
+``--batch-size`` chunks through a ``ProcessPoolExecutor`` so peak memory
+stays bounded regardless of universe size (~1.5 h on 6 workers for the
+full 20-year run).
 
 Real-world finding from this methodology: global r²_direct collapsed from
 0.386 (60-asset sample, large-cap-biased) to **0.250** (broad universe).
@@ -44,7 +46,14 @@ from honest_factor_research.analysis.replacement_test import (
     V3_OIL_FIX,
     fetch_replacement_proxies,
 )
-from honest_factor_research.data.snapshot import long_to_wide_close, load_snapshot, to_log_returns
+from honest_factor_research.data.snapshot import (
+    iter_symbol_batches,
+    list_symbols,
+    load_returns_for_symbols,
+    long_to_wide_close,
+    load_snapshot,
+    to_log_returns,
+)
 
 logger = setup_logging("analysis.08_broad_universe")
 
@@ -188,6 +197,9 @@ def main(argv=None) -> int:
     parser.add_argument("--snapshot", default=None,
                         help="Factor-ETFs snapshot (defaults to bundled)")
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--batch-size", type=int, default=400,
+                        help="Stream the universe in batches of this many "
+                             "symbols so peak memory stays bounded.")
     parser.add_argument("--sample", type=int, default=None,
                         help="Test mode: only process N assets")
     parser.add_argument("--start", default="2019-06-01")
@@ -212,13 +224,13 @@ def main(argv=None) -> int:
         datetime.strptime(args.end, "%Y-%m-%d"),
     )
     factor_returns = build_factor_returns_combined(factor_snap, new_df)
-    asset_log_ret = to_log_returns(long_to_wide_close(load_snapshot(ohlcv_path)))
     constituents = pd.read_csv(consts_path)
 
-    eligible = filter_eligible(asset_log_ret, MIN_HISTORY_DAYS)
+    all_symbols = list_symbols(ohlcv_path)
     if args.sample:
-        eligible = eligible[: args.sample]
-    logger.info("Eligible assets: %d", len(eligible))
+        all_symbols = all_symbols[: args.sample]
+    logger.info("Universe symbols: %d (batch size %d, workers %d)",
+                len(all_symbols), args.batch_size, args.workers)
 
     month_ends = pd.date_range(start=args.start_snapshot, end=args.end, freq="ME")
     factor_dates = pd.DatetimeIndex(factor_returns.index).normalize()
@@ -232,30 +244,38 @@ def main(argv=None) -> int:
     logger.info("Snapshots: %d", len(snapshot_dates))
 
     variants = make_variants()
-    work_items = [(sym, asset_log_ret[sym]) for sym in eligible]
 
+    # Stream the universe in batches: only one batch of asset returns is held
+    # in memory at a time, so peak RAM scales with --batch-size rather than the
+    # full (thousands of tickers x 20y) universe. The worker pool is created
+    # once; each batch's eligible assets are submitted and drained before the
+    # next batch is loaded.
     results = []
     t0 = time.time()
+    n_batches = (len(all_symbols) + args.batch_size - 1) // args.batch_size
     with ProcessPoolExecutor(
         max_workers=args.workers,
         initializer=_init_worker,
         initargs=(factor_returns, snapshot_dates, variants),
     ) as ex:
-        futures = {ex.submit(fit_one_asset, item): item[0] for item in work_items}
-        done = 0
-        for fut in as_completed(futures):
-            sym = futures[fut]
-            try:
-                _, r2_dict = fut.result()
-                results.append({"symbol": sym, **r2_dict})
-            except Exception as exc:
-                logger.error("%s failed: %s", sym, exc)
-            done += 1
-            if done % 100 == 0 or done == len(work_items):
-                elapsed = time.time() - t0
-                eta = (len(work_items) - done) * elapsed / max(done, 1)
-                logger.info("%d/%d done (elapsed=%.0fs, eta=%.0fs)",
-                            done, len(work_items), elapsed, eta)
+        for bi, batch in enumerate(iter_symbol_batches(all_symbols, args.batch_size), 1):
+            batch_ret = load_returns_for_symbols(ohlcv_path, batch)
+            eligible = filter_eligible(batch_ret, MIN_HISTORY_DAYS)
+            futures = {ex.submit(fit_one_asset, (sym, batch_ret[sym])): sym
+                       for sym in eligible}
+            for fut in as_completed(futures):
+                sym = futures[fut]
+                try:
+                    _, r2_dict = fut.result()
+                    results.append({"symbol": sym, **r2_dict})
+                except Exception as exc:
+                    logger.error("%s failed: %s", sym, exc)
+            del batch_ret, futures
+            elapsed = time.time() - t0
+            eta = (n_batches - bi) * elapsed / max(bi, 1)
+            logger.info("batch %d/%d: %d eligible, %d results total "
+                        "(elapsed=%.0fs, eta=%.0fs)",
+                        bi, n_batches, len(eligible), len(results), elapsed, eta)
 
     df_per_asset = pd.DataFrame(results)
     write_report(df_per_asset, constituents, out_dir)

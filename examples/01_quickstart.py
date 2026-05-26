@@ -46,6 +46,11 @@ y = joined.iloc[:, 0].to_numpy()
 direct_cols = [s.factor_id for s in catalog if s.klass == "DIRECT"]
 stat_cols = [s.factor_id for s in catalog if s.klass == "STATISTICAL"]
 derived_cols = [s.factor_id for s in catalog if s.klass == "DERIVED"]
+# Promote market_beta to DIRECT for the trust analysis (SPY is unambiguous) —
+# matches Analysis 6 (trust_stratified.py) and the single-stock explainer.
+if "market_beta" in stat_cols:
+    stat_cols.remove("market_beta")
+    direct_cols.insert(0, "market_beta")
 
 # Three regressions on the same window
 def r2_for(cols):

@@ -37,7 +37,11 @@ from honest_factor_research.analysis._common import (
     resolve_factor_snapshot,
     setup_logging,
 )
-from honest_factor_research.data.snapshot import load_returns
+from honest_factor_research.data.snapshot import (
+    iter_symbol_batches,
+    list_symbols,
+    load_returns_for_symbols,
+)
 from honest_factor_research.returns.load import load_factor_catalog, load_factor_returns
 
 logger = setup_logging("analysis.06_trust_stratified")
@@ -240,6 +244,9 @@ def main(argv=None) -> int:
                         help="Optional separate OHLCV parquet for assets (defaults to factor snapshot)")
     parser.add_argument("--symbols", nargs="+", default=None,
                         help="Restrict to these tickers (default: all in asset snapshot)")
+    parser.add_argument("--batch-size", type=int, default=400,
+                        help="Process assets in batches of this many symbols "
+                             "to bound peak memory (broad universe).")
     parser.add_argument("--output-suffix", default="trust-stratified")
     parser.add_argument("--spotlight", default=None,
                         help="Print a focused spotlight for this ticker (e.g. JPM)")
@@ -267,9 +274,8 @@ def main(argv=None) -> int:
         direct_cols.insert(0, "market_beta")
 
     asset_snap = Path(args.asset_snapshot) if args.asset_snapshot else factor_snap
-    asset_returns = load_returns(asset_snap)
-    symbols = args.symbols or sorted(asset_returns.columns)
-    logger.info("Symbols: %d", len(symbols))
+    symbols = args.symbols or list_symbols(asset_snap)
+    logger.info("Symbols: %d (batch size %d)", len(symbols), args.batch_size)
 
     # Monthly snapshot grid
     month_ends = pd.date_range(start=args.start_snapshot, end=args.end_snapshot, freq="ME")
@@ -285,24 +291,29 @@ def main(argv=None) -> int:
 
     records = []
     spotlight_rows = []
-    for sym in symbols:
-        if sym not in asset_returns.columns:
-            continue
-        ar = asset_returns[sym]
-        for snap in snapshot_dates:
-            ts = pd.Timestamp(snap)
-            ar_win = ar.loc[ar.index <= ts].tail(WINDOW_DAYS)
-            fr_win = factor_returns.loc[factor_returns.index <= ts].tail(WINDOW_DAYS)
-            r2d, r2s, r2t = compute_trust_decomposition(
-                ar_win, fr_win, direct_cols, stat_cols, derived_cols,
-            )
-            if not np.isfinite(r2t):
+    for bi, batch in enumerate(iter_symbol_batches(symbols, args.batch_size), 1):
+        asset_returns = load_returns_for_symbols(asset_snap, batch)
+        for sym in batch:
+            if sym not in asset_returns.columns:
                 continue
-            rec = {"symbol": sym, "snapshot": snap,
-                   "r2_direct": r2d, "r2_statistical": r2s, "r2_total": r2t}
-            records.append(rec)
-            if args.spotlight and sym == args.spotlight:
-                spotlight_rows.append(rec)
+            ar = asset_returns[sym]
+            for snap in snapshot_dates:
+                ts = pd.Timestamp(snap)
+                ar_win = ar.loc[ar.index <= ts].tail(WINDOW_DAYS)
+                fr_win = factor_returns.loc[factor_returns.index <= ts].tail(WINDOW_DAYS)
+                r2d, r2s, r2t = compute_trust_decomposition(
+                    ar_win, fr_win, direct_cols, stat_cols, derived_cols,
+                )
+                if not np.isfinite(r2t):
+                    continue
+                rec = {"symbol": sym, "snapshot": snap,
+                       "r2_direct": r2d, "r2_statistical": r2s, "r2_total": r2t}
+                records.append(rec)
+                if args.spotlight and sym == args.spotlight:
+                    spotlight_rows.append(rec)
+        del asset_returns
+        logger.info("batch %d done (%d symbols), %d records so far",
+                    bi, len(batch), len(records))
 
     per_asset = aggregate_per_asset(records)
     logger.info("Per-asset rows: %d", len(per_asset))

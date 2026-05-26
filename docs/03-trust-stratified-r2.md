@@ -120,24 +120,27 @@ LOOK high-quality under standard metrics but are mirror-dependent.
 
 ## What we found empirically
 
-On a 60-asset MVP universe (S&P 500 + mid-caps):
+Across the full broad universe (~2,758 US stocks with sufficient history,
+2005–2025):
 
-- **32 of 60 assets (53%) got a tier downgrade** under trust-stratified
-  vs. monolithic R²
-- 6 assets dropped from HIGH to LOW — specifically energy and utility
-  stocks
-- The downgraded set was predictable in retrospect: stocks that ARE in
-  their own sector ETFs
+- **Mean r²_direct = 0.253**, r²_+statistical = 0.282, r²_total = 0.352,
+  mean derived_share = **21.0%**
+- **1,189 of 2,758 assets (43%) fall from MED to LOW tier** under
+  trust-stratified evaluation — once self-mirroring sector baskets are
+  stripped, most mid/small-caps are mostly idiosyncratic
+- The downgraded set is predictable: stocks that ARE in their own sector
+  ETFs, plus the long tail of illiquid small-caps
 
-When we then ran the same analysis after fixing the model (V3.5 added
-Brent as DIRECT energy factor, moving energy_oil out of DERIVED):
+**Selection-bias check.** On a curated 60-stock large-cap sample the same
+method gives r²_direct = **0.432** and r²_total = **0.598** — a clean
+benchmark overstates direct explanatory power by ~70% relative to the broad
+market. That gap *is* the headline: a single curated R² is a misleading
+quality metric for production systems.
 
-- Mean r²_direct: **0.351 → 0.432 (+23%)**
-- Mean derived_share: **25.3% → 20.3%** (less mirror)
-- HIGH-to-LOW downgrades: **6 → 3** (-50%)
-
-This demonstrates that the methodology not just diagnoses problems —
-acting on its findings produces measurable improvements in model honesty.
+The methodology also validates model fixes: on the 60-stock sample, adding
+Brent as a DIRECT energy factor (V3.4) moved mean r²_direct 0.351 → 0.432
+and derived_share 25.3% → 20.3% (HIGH→LOW downgrades 6 → 3) — measurable
+improvements in model honesty from acting on the diagnostics.
 
 ## Implementation
 

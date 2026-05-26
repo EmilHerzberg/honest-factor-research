@@ -2,9 +2,11 @@
 
 > **Problem:** Ridge-fit on a 252-day window produces ONE beta per
 > (asset, factor) — an average across all market regimes in the window.
-> **18.3% of asset-factor pairs have regime-dependent beta** with |t_diff|
-> ≥ 2.5 between high-VIX and low-VIX days. Static beta is wrong in BOTH
-> regimes when the asset has regime-dependence.
+> **14.9% of asset-factor pairs have regime-dependent beta** with |t_diff|
+> ≥ 2.5 between high-VIX and low-VIX days (broad universe; 18.3% on the
+> curated 60-stock sample — even the instability rate was inflated by
+> selection). Static beta is wrong in BOTH regimes when the asset has
+> regime-dependence.
 
 ## The empirical finding
 

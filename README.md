@@ -100,18 +100,21 @@ freely available.
 
 ## In plain English
 
-Imagine a model that explains ExxonMobil (XOM) using the energy sector
-ETF (XLE). At first glance the fit looks great — R² of ~0.75.
+Imagine a model that explains Duke Energy (DUK) using the utilities sector
+ETF (XLU). At first glance the fit looks great — R² of ~0.66.
 
-But XOM is *itself* 22% of XLE. So the model is partly explaining XOM
-with a basket that already contains XOM. It's not exactly wrong, but it's
-much less informative than the high R² suggests. A more honest read:
-"this model explains XOM with macro factors at ~18% R², plus an extra
-~57% that's mostly XOM-explaining-XOM."
+But DUK is *itself* a significant constituent of XLU. So the model is partly
+explaining DUK with a basket that already contains DUK. It's not exactly
+wrong, but it's much less informative than the high R² suggests. A more
+honest read: "this model explains DUK with direct macro factors at ~17% R²,
+plus ~16% from style factors — and the remaining ~33% (about half the
+apparent fit) is mostly DUK-explaining-DUK."
 
 This project builds tools to detect that pattern automatically across
 many stocks and factors, and to report what's left when you strip the
-mirror out.
+mirror out. (Energy names like ExxonMobil used to show the same self-mirror
+against XLE — XOM is 22% of XLE — until we replaced XLE with a direct
+Brent-oil factor. That's exactly the kind of fix this audit surfaces.)
 
 ---
 
@@ -141,17 +144,19 @@ Brief plain-language explanations. Full definitions in [`docs/glossary.md`](docs
 
 ## Key findings
 
-All numbers below come from actually running the pipeline on a
-60-asset MVP universe and a broader universe of 2,241 top-market-cap US
-stocks. See [`reports/`](reports/) for the raw outputs.
+All numbers below come from actually running the pipeline across a broad
+universe of ~2,900 top-market-cap US stocks (2,758 with sufficient history)
+over **2005–2025**, with a curated 60-stock large-cap sample shown alongside
+to expose selection bias. See [`reports/`](reports/) for the raw outputs.
 
 | Finding | Plain-English meaning | Why it matters |
 |---|---|---|
-| **32 of 60 assets (53%)** got a tier downgrade under trust-stratified evaluation vs. monolithic R² | More than half of "high-quality" assets weren't as well-explained as the single R² suggested | A single R² is a misleading quality metric for production systems |
-| **18.3% of asset-factor pairs** had regime-dependent beta with `\|t_diff\| ≥ 2.5` between high-VIX and low-VIX regimes | Static beta is wrong in at least one regime for 1 in 5 pairs | Models that don't account for regimes will fail exactly when markets get interesting |
-| **Lithium beat Gold** as a broadly explanatory factor (mean Δr²=+0.010 vs Gold's +0.005 across 2,241 stocks) | Theory said Gold was essential. Data disagreed. | Empirical validation can overturn intuitive priors — don't trust theory without checking |
-| **Brent-spot replaced XLE** for oil exposure → r² for energy stocks roughly doubled (e.g. XOM/COP +0.218 each) | The factor ETF (XLE) was measuring stock reactions to oil, not oil itself | Choosing the right proxy matters more than people realize |
-| **Block-bootstrap CIs** can be 0.2+ wide for windows containing crisis days (e.g. AAPL 2021-02-26 window: R²=0.79, CI=[0.64, 0.89] — verified on bundled data) | Single-number R² hides huge uncertainty when the data is fat-tailed | If your CI is wide, the point estimate alone is misleading |
+| **The collapse:** on a curated 60-stock large-cap sample, direct factors explain **r²_direct ≈ 0.43**; across the full **~2,758-stock** universe that drops to **0.25** (total R² 0.60 → 0.35) | A clean, large-cap sample makes a factor model look far more explanatory than it is on the real, broad market | Selection bias inflates apparent model quality — the curated benchmark is the optimistic lie |
+| **1,189 of 2,758 assets (43%)** fall from MED to LOW tier under trust-stratified evaluation once self-mirroring sector baskets are stripped | Most mid/small-caps are genuinely idiosyncratic — the factors don't really explain them | A single R² is a misleading quality metric for production systems |
+| **14.9% of asset-factor pairs** have regime-dependent beta with `\|t_diff\| ≥ 2.5` between high-VIX and low-VIX — down from **18.3%** on the curated sample | Static beta is wrong in at least one regime for ~1 in 7 pairs — and even that instability rate was over-stated by the curated sample | Models that don't account for regimes will fail exactly when markets get interesting |
+| **Lithium beat Gold** as a broadly explanatory factor (mean Δr²=+0.010 vs Gold's +0.004 across 2,385 stocks) | Theory said Gold was essential. Data disagreed. | Empirical validation can overturn intuitive priors — don't trust theory without checking |
+| **Brent-spot replaced XLE** for oil exposure → energy stocks become *directly* explained instead of sector-mirrored (over 20 years XOM ends up ~49% direct-explained, not a self-mirror) | The factor ETF (XLE) was measuring stock reactions to oil, not oil itself | Choosing the right proxy matters more than people realize |
+| **Block-bootstrap CIs** widen to 0.2+ for windows that contain crisis days | Single-number R² hides huge uncertainty when the data is fat-tailed | If your CI is wide, the point estimate alone is misleading |
 | **`growth × value` correlation** was fixed from -0.925 to +0.000 after re-ordering residualization | The original tier setup was double-counting style information | Residualization order is a real engineering decision, not a detail |
 
 ---
@@ -159,9 +164,9 @@ stocks. See [`reports/`](reports/) for the raw outputs.
 ## Visual example
 
 The headline methodology in one picture. **DUK (Duke Energy)** on
-2024-06-28 — the standard R² is 0.659 (looks like a high-quality fit),
-but trust-stratified decomposition reveals that **50% of the explained
-variance comes from sector baskets** (DUK is a constituent of XLU):
+2024-06-28 — the standard R² is 0.658 (looks like a high-quality fit),
+but trust-stratified decomposition reveals that **about half of the
+explained variance comes from sector baskets** (DUK is a constituent of XLU):
 
 ![Traditional R² vs Honest Decomposition](assets/trust_decomposition.png)
 
@@ -210,8 +215,10 @@ For reviewers who care about the engineering, not just the findings:
 - **Sector-conditional factor loading** — factors can declare
   `applicable_sectors: [...]` so each asset gets only relevant factors,
   not a kitchen-sink regression.
-- **Multiprocessing-enabled broad-universe replay** (~18 min for 2,241
-  stocks × 49 monthly snapshots × 18 variants on 8 cores).
+- **Memory-bounded broad-universe replay** — streams ~2,944 stocks × 241
+  monthly snapshots × 15 variants through a process pool in symbol batches,
+  so peak RAM stays flat regardless of universe size (~1.5 h on 6 cores for
+  the full 2005–2025 run).
 - **Reproducible reports** under [`reports/`](reports/) — markdown +
   CSVs from actual pipeline runs, not hand-edited.
 - **Unit tests** for the core math (residualization correctness,
@@ -237,24 +244,24 @@ python examples/01_quickstart.py
 | Command | Works with bundled data? | Notes |
 |---|---|---|
 | `pytest tests/test_residualization.py tests/test_bootstrap.py` | ✅ yes (no data needed) | Pure-math tests, ~2 sec |
-| `python examples/01_quickstart.py` | ✅ yes (bundled snapshot, 4.8 MB) | Tested, produces plot |
+| `python examples/01_quickstart.py` | ✅ yes (bundled snapshot, 8.6 MB) | Tested, produces plot |
 | `python examples/02_full_pipeline.py` | ✅ yes (bundled snapshot) | Full V3.5 pipeline on 5 tickers |
 | `python examples/03_explain_single_stock.py --ticker DUK` | ✅ yes (bundled snapshot) | Single-ticker explainer CLI |
 | `python -m honest_factor_research.analysis.trust_stratified` | ✅ yes (bundled snapshot) | Re-runs Analysis 6 |
-| `python examples/reproduce_findings.py` | ⚠️ partial | Needs broad-universe OHLCV (50 MB) for Analysis 8 — fetch via `python -m honest_factor_research.data.fetch` |
+| `python examples/reproduce_findings.py` | ⚠️ partial | Needs broad-universe OHLCV (~170 MB) for Analysis 8 — fetch via `python -m honest_factor_research.data.fetch` |
 
 Output (verbatim from a fresh run):
 
 ```
-Loading factor returns from: data/factor_etfs_2026-05-21.parquet
-  -> 28 residualized factors over 1257 trading days
+Loading factor returns from: data/factor_etfs_2025-12-31.parquet
+  -> 28 residualized factors over 5284 trading days
 
 === Trust-Stratified R² for AAPL on 2024-06-28 ===
-r²_direct        = 0.106  (DIRECT factors only)
-r²_+statistical  = 0.320  (+ STATISTICAL — marginal +0.214)
-r²_total         = 0.358  (+ DERIVED — marginal +0.038)
-derived_share    = 10.7%
-idiosyncratic    = 64.2%
+r²_direct        = 0.256  (DIRECT factors only)
+r²_+statistical  = 0.319  (+ STATISTICAL — marginal +0.063)
+r²_total         = 0.351  (+ DERIVED — marginal +0.032)
+derived_share    = 9.2%
+idiosyncratic    = 64.9%
 
 Plot saved: examples/01_quickstart_decomposition.png
 ```
@@ -275,7 +282,7 @@ Want to reproduce *all 10* analyses end-to-end?
 
 ```bash
 # Note: Analysis 8 (broad universe) needs the full OHLCV dataset.
-# Re-fetch via: python -m honest_factor_research.data.fetch (~3-10 min, ~50 MB).
+# Re-fetch via: python -m honest_factor_research.data.fetch (~5-15 min, ~170 MB).
 python examples/reproduce_findings.py
 ```
 
@@ -288,23 +295,25 @@ Trust-stratified decomposition from the bundled sample data:
 ```
 Symbol: AAPL    Window-end: 2024-06-28
 =====================================
-Standard R² (point estimate)         : 0.358
-Honest / Direct R²                   : 0.106  (DIRECT factors only)
-Statistical-style component          : +0.214 (value + growth + momentum + quality)
-Derived / Sector-mirror component    : +0.038 (XL* sector baskets etc.)
-Unexplained / idiosyncratic          : 64.2%
+Standard R² (point estimate)         : 0.351
+Honest / Direct R²                   : 0.256  (DIRECT factors only)
+Statistical-style component          : +0.063 (value + growth + momentum + quality)
+Derived / Sector-mirror component    : +0.032 (XL* sector baskets etc.)
+Unexplained / idiosyncratic          : 64.9%
 
 Interpretation:
-  - The model "looks like" it explains 36% of AAPL's variance.
-  - Of that, 11% is from genuinely direct macro factors.
-  - Another 21% is from academic style factors (medium trust).
-  - Another 4% is from sector baskets — small mirror risk here.
-  - The remaining 64% is genuinely idiosyncratic noise.
+  - The model "looks like" it explains 35% of AAPL's variance.
+  - Of that, 26% is from genuinely direct macro factors.
+  - Another 6% is from academic style factors (medium trust).
+  - Another 3% is from sector baskets — minimal mirror risk here.
+  - The remaining 65% is genuinely idiosyncratic noise.
 ```
 
-For an asset like XOM (Energy stock), the same analysis typically shows a
-much higher *derived* share — because XLE explains XOM via the
-self-mirror effect described above.
+For a utility like DUK, the same analysis shows a much higher *derived*
+share (~50%) — because XLU explains DUK via the self-mirror effect
+described above. (Energy names like XOM used to look the same against XLE,
+until the Brent-oil DIRECT factor reassigned that variance to a real macro
+driver — on the 20-year data XOM is now ~49% direct-explained.)
 
 ---
 
@@ -347,10 +356,11 @@ honest-factor-research/
 │   ├── README.md                      #   recommended reading order
 │   ├── 2026-05-23-orthogonality-and-discovery/
 │   ├── 2026-05-24-v3.4-validation/
-│   └── 2026-05-25-v3.5-regime-and-ci/
+│   ├── 2026-05-25-v3.5-regime-and-ci/
+│   └── 2026-05-26-broad-universe-20y/   # 2005-2025 broad-universe headline run
 │
 ├── data/                              # bundled sample snapshots
-│   ├── factor_etfs_2026-05-21.parquet
+│   ├── factor_etfs_2025-12-31.parquet            # 28 ETFs + 61 demo stocks, 2005-2025
 │   └── broad_universe_constituents_2026-05-24.csv
 │
 ├── tests/                             # unit tests
@@ -431,8 +441,8 @@ python examples/01_quickstart.py
 For the full broad-universe replay (Analysis 8):
 
 ```bash
-python -m honest_factor_research.data.fetch                 # ~3-10 min, ~50 MB
-python examples/reproduce_findings.py                       # ~1 hour on 8 cores
+python -m honest_factor_research.data.fetch --start 2005-01-01 --end 2025-12-31   # ~5-15 min, ~170 MB
+python examples/reproduce_findings.py                       # ~2-3 h, memory-bounded (batched)
 ```
 
 ---
@@ -441,8 +451,10 @@ python examples/reproduce_findings.py                       # ~1 hour on 8 cores
 
 This project is honest about what it is and isn't:
 
-- **Historical data only.** Period 2020-2024 covers COVID + the
-  post-COVID monetary cycle — not all market regimes.
+- **Historical data only.** Period 2005–2025 (20+ years) spans the GFC,
+  COVID, and multiple rate cycles — but the factor-proxy ETFs launched at
+  different times, so factor coverage deepens over the window (early years
+  are sparser). It is not 20 full years of *every* factor relationship.
 - **No investment advice.** No backtested strategy. No alpha generation.
   No predictions. See the disclaimer at the top.
 - **No live trading.** This is a research / model-audit framework, not a

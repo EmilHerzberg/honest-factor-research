@@ -40,7 +40,7 @@ jobs:
 
       - name: Run smoke test if sample data is available
         run: |
-          if [ -f "data/factor_etfs_2026-05-21.parquet" ]; then
+          if [ -f "data/factor_etfs_2025-12-31.parquet" ]; then
             pytest tests/test_pipeline_smoke.py -v
           else
             echo "Sample snapshot missing — skipping smoke test."

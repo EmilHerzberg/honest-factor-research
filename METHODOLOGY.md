@@ -62,7 +62,7 @@ Implemented in: [`honest_factor_research/analysis/replacement_test.py`](honest_f
 + [`honest_factor_research/analysis/broad_universe.py`](honest_factor_research/analysis/broad_universe.py).
 
 **Counterintuitive result we found:** Gold (which theory says is essential
-for safe-haven hedging) delivered only Δr²=+0.005 on a 2,241-asset universe.
+for safe-haven hedging) delivered only Δr²=+0.004 on a 2,385-asset universe.
 Lithium (which I expected to be niche) delivered Δr²=+0.010 — more than
 double Gold's contribution. The lesson: **brainstorm intuition is unreliable
 without empirical validation**.
@@ -97,13 +97,16 @@ Compute `derived_share = (r²_total − r²_+statistical) / r²_total`.
 
 A high derived_share means most of the model's "explanation" comes from
 sector baskets — possibly mirroring the asset's own contribution to those
-baskets. Examples we found in our 60-asset universe:
+baskets. Examples (broad-universe averages, 2005–2025):
 
-- DUK (Utility): r²_total=0.735 looks great, but r²_direct=0.174,
-  derived_share=62.5%. The DUK exposure is mostly xl_utilities mirroring
-  itself.
-- XOM (Energy): r²_total=0.753, r²_direct=0.185, derived_share=57.4%.
-  XOM is 22% of XLE — half the apparent fit is self-mirror.
+- DUK (Utility): r²_total=0.682, but r²_direct=0.263, derived_share=53.2%.
+  DUK's exposure is mostly xl_utilities mirroring itself — there is no
+  direct "utility rates" factor to absorb it.
+- XOM (Energy): once we added a direct Brent-oil factor (V3.4), XOM's
+  derived_share collapsed to ~9% (r²_direct=0.493, r²_total=0.608). XOM is
+  22% of XLE, so it *used* to look like a ~57% self-mirror — replacing the
+  XLE proxy with the oil price itself is what fixed it. The mirror was a
+  proxy-choice artifact, not an intrinsic property of the stock.
 - JPM (Bank): r²_total=0.85 BUT r²_direct=0.20, derived_share=65%.
   The mirror artifact is huge.
 

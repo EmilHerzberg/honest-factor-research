@@ -31,7 +31,11 @@ from honest_factor_research.analysis._common import (
     resolve_factor_snapshot,
     setup_logging,
 )
-from honest_factor_research.data.snapshot import load_returns
+from honest_factor_research.data.snapshot import (
+    iter_symbol_batches,
+    list_symbols,
+    load_returns_for_symbols,
+)
 from honest_factor_research.returns.load import load_factor_returns
 
 logger = setup_logging("analysis.09_lead_lag")
@@ -143,6 +147,9 @@ def main(argv=None) -> int:
     parser.add_argument("--catalog", default=None)
     parser.add_argument("--asset-snapshot", default=None)
     parser.add_argument("--symbols", nargs="+", default=None)
+    parser.add_argument("--batch-size", type=int, default=400,
+                        help="Process assets in batches of this many symbols "
+                             "to bound peak memory (broad universe).")
     parser.add_argument("--output-suffix", default="lead-lag")
     args = parser.parse_args(argv)
 
@@ -150,19 +157,24 @@ def main(argv=None) -> int:
     out_dir = report_output_dir(args.output_suffix)
     factor_returns = load_factor_returns(factor_snap, args.catalog)
     asset_snap = Path(args.asset_snapshot) if args.asset_snapshot else factor_snap
-    asset_returns = load_returns(asset_snap)
-    symbols = args.symbols or sorted(asset_returns.columns)
+    symbols = args.symbols or list_symbols(asset_snap)
+    logger.info("Symbols: %d (batch size %d)", len(symbols), args.batch_size)
 
     rows = []
-    for sym in symbols:
-        if sym not in asset_returns.columns:
-            continue
-        ar = asset_returns[sym]
-        for fid in factor_returns.columns:
-            r = lead_lag_for_pair(ar, factor_returns[fid])
-            if r.get("n_obs", 0) < MIN_OBS:
+    for bi, batch in enumerate(iter_symbol_batches(symbols, args.batch_size), 1):
+        asset_returns = load_returns_for_symbols(asset_snap, batch)
+        for sym in batch:
+            if sym not in asset_returns.columns:
                 continue
-            rows.append({"symbol": sym, "factor": fid, **r})
+            ar = asset_returns[sym]
+            for fid in factor_returns.columns:
+                r = lead_lag_for_pair(ar, factor_returns[fid])
+                if r.get("n_obs", 0) < MIN_OBS:
+                    continue
+                rows.append({"symbol": sym, "factor": fid, **r})
+        del asset_returns
+        logger.info("batch %d done (%d symbols), %d rows so far",
+                    bi, len(batch), len(rows))
 
     df = pd.DataFrame(rows)
     write_report(df, out_dir)

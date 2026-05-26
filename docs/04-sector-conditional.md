@@ -88,11 +88,16 @@ the asset's sector matches.
 ## What we measured
 
 After implementing Option B, we re-ran Analysis 6 (trust-stratified R²)
-on the 60-asset MVP universe:
+on the 60-stock large-cap validation sample (a controlled A/B for the
+catalog change):
 
 - Mean r²_direct: **0.351 → 0.432 (+23%)**
 - Mean derived_share: **25.3% → 20.3%** (more honest, less mirror)
 - HIGH→LOW tier downgrades: **6 → 3** (-50%)
+
+(On the full ~2,758-stock broad universe the absolute level is far lower —
+r²_direct ≈ **0.253** — but the architecture's relative improvement holds;
+see [`03-trust-stratified-r2.md`](03-trust-stratified-r2.md).)
 
 Specific dramatic improvements:
 - FCX (copper miner): newly Top-15 with r²_direct=0.605 (Copper + Uranium)

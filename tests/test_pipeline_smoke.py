@@ -13,7 +13,7 @@ from honest_factor_research.data.snapshot import load_returns
 from honest_factor_research.exposure import FactorExposurePipeline
 
 
-SAMPLE_SNAPSHOT = DEFAULT_DATA_DIR / "factor_etfs_2026-05-21.parquet"
+SAMPLE_SNAPSHOT = DEFAULT_DATA_DIR / "factor_etfs_2025-12-31.parquet"
 
 
 @pytest.mark.skipif(not SAMPLE_SNAPSHOT.exists(),

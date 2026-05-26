@@ -48,9 +48,10 @@ See [`exposure/bootstrap.py`](../honest_factor_research/exposure/bootstrap.py).
 ### The problem
 
 Ridge over a 252-day window produces ONE beta per (asset, factor) — a mean
-across all market regimes in the window. Analysis 10 showed that **18.3%
-of asset-factor pairs** have |t_diff| ≥ 2.5 between high-VIX (>25) and
-low-VIX (<15) regimes. Most extreme: GE × value flips +2.94 → -0.15.
+across all market regimes in the window. Analysis 10 showed that **14.9%
+of asset-factor pairs** (broad universe; 18.3% on the curated 60-stock
+sample) have |t_diff| ≥ 2.5 between high-VIX (>25) and low-VIX (<15)
+regimes. Most extreme on the curated sample: GE × value flips +2.94 → -0.15.
 
 Static beta is a mean — in any specific regime it can be substantially
 wrong, and the gap is largest in the regimes where you most need accuracy

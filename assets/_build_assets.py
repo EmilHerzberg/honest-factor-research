@@ -205,16 +205,16 @@ def build_trust_decomposition() -> None:
               ha="center", color=TEXT_MUTED, fontsize=10, fontstyle="italic",
               fontfamily="DejaVu Sans")
 
-    # Single bar: 0.659 explained / 0.341 unexplained
-    ax_l.add_patch(Rectangle((0.05, 1.5), 0.90 * 0.659, 0.8,
+    # Single bar: 0.658 explained / 0.342 unexplained
+    ax_l.add_patch(Rectangle((0.05, 1.5), 0.90 * 0.658, 0.8,
                              color=ACCENT))
-    ax_l.add_patch(Rectangle((0.05 + 0.90 * 0.659, 1.5),
-                             0.90 * 0.341, 0.8, color=UNEXPLAINED))
+    ax_l.add_patch(Rectangle((0.05 + 0.90 * 0.658, 1.5),
+                             0.90 * 0.342, 0.8, color=UNEXPLAINED))
 
-    ax_l.text(0.05 + (0.90 * 0.659) / 2, 1.9, "R² = 0.659",
+    ax_l.text(0.05 + (0.90 * 0.658) / 2, 1.9, "R² = 0.658",
               ha="center", va="center", color=BG, fontsize=14,
               fontweight="bold", fontfamily="DejaVu Sans")
-    ax_l.text(0.05 + 0.90 * 0.659 + (0.90 * 0.341) / 2, 1.9, "0.341",
+    ax_l.text(0.05 + 0.90 * 0.658 + (0.90 * 0.342) / 2, 1.9, "0.342",
               ha="center", va="center", color=TEXT, fontsize=11,
               fontfamily="DejaVu Sans")
 
@@ -237,10 +237,10 @@ def build_trust_decomposition() -> None:
 
     # Stacked bar: DIRECT 0.169 / +STAT 0.160 / +DERIVED 0.330 / UNEXPL 0.341
     parts = [
-        (0.169, DIRECT_COLOR, "DIRECT\n0.169"),
+        (0.173, DIRECT_COLOR, "DIRECT\n0.173"),
         (0.160, STAT_COLOR, "+ STAT\n+0.160"),
-        (0.330, DERIVED_COLOR, "+ DERIVED\n+0.330"),
-        (0.341, UNEXPLAINED, "noise\n0.341"),
+        (0.325, DERIVED_COLOR, "+ DERIVED\n+0.325"),
+        (0.342, UNEXPLAINED, "noise\n0.342"),
     ]
     cum = 0.05
     for share, color, label in parts:
@@ -254,8 +254,8 @@ def build_trust_decomposition() -> None:
 
     # Annotation arrow + warning
     ax_r.annotate(
-        "50% of explained R²\nfrom sector-baskets\n(DUK is in XLU)",
-        xy=(0.05 + 0.90 * (0.169 + 0.160 + 0.330 / 2), 1.45),
+        "≈49% of explained R²\nfrom sector-baskets\n(DUK is in XLU)",
+        xy=(0.05 + 0.90 * (0.173 + 0.160 + 0.325 / 2), 1.45),
         xytext=(0.05 + 0.90 * 0.5, 0.35),
         ha="center", color=DERIVED_COLOR, fontsize=10,
         fontweight="bold", fontfamily="DejaVu Sans",

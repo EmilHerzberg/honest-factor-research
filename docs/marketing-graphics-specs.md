@@ -331,12 +331,12 @@ Collision check:         overlapsContent: no · insideSafeMargins: yes ·
 Primary system accent:    systemCyan #59D8E6
   · means:                "the standard view's R² — looks comprehensive
                           but is undecomposed"
-  · appears at:           bb_trad_bar (single cyan block representing 0.659)
+  · appears at:           bb_trad_bar (single cyan block representing 0.658)
 Warm contrast accent:     frictionOrange #D9864D  (NOT insightAmber — this
                           IS a friction/risk story, not a positive insight)
   · means:                "DERIVED / sector-mirror — the part of R² that
                           could be artifact"
-  · appears at:           the third segment of bb_honest_bar (0.330 portion),
+  · appears at:           the third segment of bb_honest_bar (0.325 portion),
                           bb_arrow_warn text + arrow stroke
 Differentiator accent:    strategicViolet #8E7CC3
   · means:                "STATISTICAL — academic style factors, the medium-
@@ -348,9 +348,9 @@ Anti-monochrome check:    ✓ (cyan + orange + violet on the same frame)
 ```
 
 > **Use `successMint #6ED3A3`** for the FIRST segment of bb_honest_bar
-> (the 0.169 DIRECT portion). This is the fourth visible color but it's
+> (the 0.173 DIRECT portion). This is the fourth visible color but it's
 > a state color not an "accent" — it signals "this is the trustworthy
-> part". `textTaupe @ 22% opacity` for the unexplained (0.341) segment.
+> part". `textTaupe @ 22% opacity` for the unexplained (0.342) segment.
 
 ## Data (real, verified)
 
@@ -360,13 +360,13 @@ All numbers from running `examples/03_explain_single_stock.py --ticker DUK
 ```
 Asset:           DUK (Duke Energy)
 Window-end:      2024-06-28 (252-day rolling window)
-Standard R²:     0.659
+Standard R²:     0.658
 Honest decomposition:
-  DIRECT          0.169  →  ~17 % of total variance, mint segment
+  DIRECT          0.173  →  ~17 % of total variance, mint segment
   + STATISTICAL  +0.160  →  ~16 %, violet segment
-  + DERIVED      +0.330  →  ~33 %, orange segment — MIRROR-SUSPECT
-  unexplained     0.341  →  ~34 %, grey segment
-Derived share:   50.0 % of explained R² comes from sector-baskets
+  + DERIVED      +0.325  →  ~33 %, orange segment — MIRROR-SUSPECT
+  unexplained     0.342  →  ~34 %, grey segment
+Derived share:   49.4 % of explained R² comes from sector-baskets
                  (DUK is a constituent of XLU, the Utilities Sector ETF)
 ```
 
@@ -379,17 +379,17 @@ Asset stamp:     DUK (Duke Energy) · window ending 2024-06-28
 
 Panel top header:    Traditional R²
 Panel top sub:       What you usually see
-Trad bar label:      R² = 0.659  (rendered inside the bar, centered)
+Trad bar label:      R² = 0.658  (rendered inside the bar, centered)
 Trad quote:          "DUK looks 66 % explained.
                      Probably a high-quality fit."
 
 Panel bottom header: Honest decomposition
 Panel bottom sub:    How much can we honestly defend?
-Segment labels:      DIRECT 0.169  ·  + STAT +0.160  ·  + DERIVED +0.330  ·  noise 0.341
+Segment labels:      DIRECT 0.173  ·  + STAT +0.160  ·  + DERIVED +0.325  ·  noise 0.342
                      (labels sit BELOW the bar, each centered under its segment)
 
 Callout (with arrow up to orange segment):
-                     50 % of explained R²
+                     49 % of explained R²
                      comes from sector-baskets
                      (DUK is in XLU)
 
@@ -407,8 +407,8 @@ Takeaway:        Same asset. Same data.
   `rgba(244,241,234,0.08)`. Each segment in the honest-decomp bar gets
   the same corner-radius treatment only on the outermost segments
   (first segment left-rounded; last segment right-rounded).
-- **R² = 0.659 label** centered in the cyan portion of bb_trad_bar.
-  `textWarmWhite` semibold 40px. The "0.341" number sits centered in the
+- **R² = 0.658 label** centered in the cyan portion of bb_trad_bar.
+  `textWarmWhite` semibold 40px. The "0.342" number sits centered in the
   grey portion at `textWarmWhite` 24px regular.
 - **Segment labels** below the honest-decomp bar are 22px mono, color-
   matched to their segment (mint label below mint segment, etc.) — gives
@@ -425,7 +425,7 @@ Takeaway:        Same asset. Same data.
 - **Beat 1 (0–1.2s):** headline + asset stamp fade in. Panels (empty)
   fade in at 30% opacity.
 - **Beat 2 (1.2–2.4s):** top panel "Traditional R²" fills — trad bar
-  draws left-to-right (700ms easeOutCubic); R² number counts up 0 → 0.659.
+  draws left-to-right (700ms easeOutCubic); R² number counts up 0 → 0.658.
 - **Beat 3 (2.4–5.4s, MAIN EVENT):** bottom panel "Honest decomposition"
   segments place in sequentially — mint (400ms), violet (350ms), orange
   (450ms with subtle highlight pulse), grey (300ms). Segment labels fade
@@ -761,8 +761,8 @@ above.
 5. Output ends up under `out/<id>.{png,mp4}` and is ready for LinkedIn /
    the honest-factor-research repo `assets/` folder.
 
-All numerical claims in these specs (DUK 0.659 / 0.169 / 0.160 / 0.330 /
-0.341 / 50%) are verifiable by running the source repo's
+All numerical claims in these specs (DUK 0.658 / 0.173 / 0.160 / 0.325 /
+0.342 / 49 %) are verifiable by running the source repo's
 `examples/03_explain_single_stock.py --ticker DUK --window-end 2024-06-28`.
 None of the numbers are invented.
 

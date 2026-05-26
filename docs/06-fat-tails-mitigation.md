@@ -95,7 +95,9 @@ fit time but tightens the CI considerably. Bump to 500 if you have time.
 
 ## What the empirical results look like
 
-After running on 60 assets × 60 monthly snapshots:
+After running on the 60-stock large-cap sample × 60 monthly snapshots
+(CI behavior is illustrated on the controlled sample; it does not depend
+on universe size):
 
 - **Mean R² point estimate:** 0.59
 - **Mean CI-width (p95 − p05):** 0.15 (±0.075 around point)
